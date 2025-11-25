@@ -1,0 +1,120 @@
+.outerContainer {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #fff;
+  margin-top: 40px;
+  position: relative;
+}
+
+.container {
+  flex-grow: 1;
+  padding: 16px;
+}
+
+.backButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 16px;
+}
+
+.walletInfoContainer {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.walletImage {
+  width: 22px;
+  height: 22px;
+  margin-right: 16px;
+}
+
+.walletAddress {
+  font-size: 16px;
+}
+
+.card {
+  margin-bottom: 16px;
+  background-color: #F8FAFB;
+  border: 1px solid #E7E8E9;
+  border-radius: 4px;
+  padding: 16px;
+}
+
+.cardTopRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.tokenIcon {
+  width: 32px;
+  height: 32px;
+  margin-right: 23px;
+}
+
+.tokenName {
+  font-size: 22px;
+  font-family: "Pretendard-Semibold";
+}
+
+.cardBottomRow {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.balanceText {
+  color: #A9A9A9;
+  font-size: 16px;
+}
+
+.balanceAmount {
+  font-weight: bold;
+  color: #34393C;
+}
+
+.title {
+  margin-top: 20px;
+  margin-bottom: 10px;
+  font-weight: bold;
+  font-size: 22px;
+}
+
+.input {
+  margin-bottom: 16px;
+  height: 52px;
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #E7E8E9;
+  border-radius: 4px;
+  background-color: #F8FAFB;
+  box-sizing: border-box;
+  font-size: 16px;
+}
+
+.buttonContainer {
+  position: absolute;
+  bottom: 32px;
+  left: 24px;
+  right: 24px;
+}
+
+.nextButton {
+  width: 100%;
+  padding: 14px 8px;
+  border-radius: 6px;
+  background-color: #0055FF;
+  color: white;
+  border: none;
+  font-size: 16px;
+  font-family: "Pretendard-Bold";
+  cursor: pointer;
+}

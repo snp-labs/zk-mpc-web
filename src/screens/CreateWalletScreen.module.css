@@ -1,0 +1,104 @@
+.outerContainer {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  position: relative;
+}
+
+.container {
+  flex-grow: 1;
+  padding: 24px;
+  margin-top: 80px;
+  overflow-y: auto;
+}
+
+.header {
+  font-size: 28px;
+  font-family: "Pretendard-Light";
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.subHeader {
+  font-size: 14px;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.infoBoxContainer {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 24px;
+}
+
+.infoBox {
+  border-radius: 6px;
+  padding: 14px;
+  background-color: #E7E8E9;
+  margin-bottom: 23px;
+}
+
+.infoBoxLabel {
+  font-family: "Pretendard-Bold";
+  font-size: 16px;
+  text-align: left;
+  margin-bottom: 8px;
+}
+
+.infoBoxValue {
+  text-align: left;
+}
+
+.adminRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.adminInfoBox {
+  border-radius: 6px;
+  padding: 14px;
+  border: 1px solid #E7E8E9;
+  background-color: #F8FAFB;
+  flex-grow: 1;
+}
+
+.deleteButton {
+  margin-left: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 24px;
+  color: #707476;
+}
+
+.addButton {
+  margin-top: 16px;
+  margin-bottom: 32px;
+  border-radius: 6px;
+  padding: 10px;
+  border: 1px solid #E7E8E9;
+  background-color: white;
+  cursor: pointer;
+  width: 100%;
+}
+
+.buttonContainer {
+  position: absolute;
+  bottom: 32px;
+  left: 24px;
+  right: 24px;
+}
+
+.nextButton {
+  width: 100%;
+  padding: 14px 8px;
+  border-radius: 6px;
+  background-color: #0055FF;
+  color: white;
+  border: none;
+  font-size: 16px;
+  font-family: "Pretendard-Bold";
+  cursor: pointer;
+}

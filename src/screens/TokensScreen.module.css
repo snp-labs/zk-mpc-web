@@ -1,0 +1,104 @@
+.container {
+  flex-grow: 1;
+  padding: 16px;
+  background-color: #fff;
+  margin-top: 40px;
+}
+
+.header {
+  margin-bottom: 14px;
+  font-size: 18px; /* Approximating headlineSmall */
+  font-family: "Pretendard-Bold";
+}
+
+.walletInfoContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.walletImage {
+  width: 22px;
+  height: 22px;
+  margin-right: 16px;
+}
+
+.walletAddress {
+  font-size: 16px;
+}
+
+.addTokenButton {
+  margin-bottom: 40px;
+  border-radius: 6px;
+  background-color: #222B3D;
+  color: white;
+  padding: 8px 12px;
+  border: none;
+  cursor: pointer;
+  text-align: center;
+}
+
+.card {
+  margin-bottom: 16px;
+  background-color: #F8FAFB;
+  border: 1px solid #E7E8E9;
+  border-radius: 4px; /* Default Card radius */
+  padding: 16px;
+}
+
+.cardTopRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.tokenIcon {
+  width: 32px;
+  height: 32px;
+  margin-right: 23px;
+}
+
+.tokenName {
+    font-size: 22px; /* Approximating titleLarge */
+    font-family: "Pretendard-Semibold";
+}
+
+.cardBottomRow {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.balanceText {
+    color: #A9A9A9;
+    font-size: 16px; /* Approximating bodyLarge */
+}
+
+.balanceAmount {
+    font-weight: bold;
+    color: #34393C; /* Or whatever the default text color is */
+}
+
+.sendButtonContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+}
+
+.iconButtonWrapper {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%; /* Circle */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.sendButtonText {
+    font-weight: bold;
+}
