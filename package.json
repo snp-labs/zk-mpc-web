@@ -19,7 +19,8 @@
     "text-encoding": "^0.7.0",
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4",
-    "zod": "^4.1.13"
+    "zod": "^4.1.13",
+    "zustand": "^5.0.8"
   },
   "scripts": {
     "start": "react-scripts start",
