@@ -1,12 +1,11 @@
 import {InitProtocolSchema, ProceedRoundSchema, StartProtocolSchema} from './ProtocolSchema';
-import {delegate_process_message, ready_message_factory, participant_factory, generate_sign_input, generate_tpresign_input, generate_trecover_target_input, generate_trefresh_input, generate_tshare_input} from '../wasm/pkg/threshold_ecdsa';
-import { ContinueMessage, DelegateOutput, extractRound, isContinue, isDone, ProceedRoundMessage, ProtocolCompleteMessage, RoundCompleteMessage } from '../types/Messages';
+import {delegate_process_message, ready_message_factory, participant_factory, generate_sign_input, generate_tpresign_input, generate_trecover_target_input, generate_tshare_input} from '../wasm/pkg/threshold_ecdsa';
+import { ContinueMessage, DelegateOutput, extractRound, isContinue, isDone, ProceedRoundMessage, ProtocolCompleteMessage, RoundCompleteMessage, InitProtocolEndMessage } from '../types/Messages';
 import {useMPCStore} from '../hooks/useMPCStore';
-import { InitProtocolEndMessage } from '../types/Messages';
 import { participantTypeOf, getParticipantTypeName, ParticipantType } from '../types/ParticipantType';
 import { getRoundName, Round } from '../types/Round';
 
-const execute = (json: String) => {
+export const execute = (json: String) => {
     const userId = useMPCStore((state) => state.userId);
     const initResult = InitProtocolSchema.safeParse(json);
     if (initResult.success) {

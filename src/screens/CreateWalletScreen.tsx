@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './CreateWalletScreen.module.css';
-import {delegate_process_message, ready_message_factory, participant_factory} from '../wasm/pkg/threshold_ecdsa';
-import { DelegateOutput, isContinue, isDone } from '../types/Messages';
+import { useWebSocket } from '../hooks/useWebSocket';
+import {execute} from '../core/ProtocolExecutor';
+import { registerGroup } from '../api/groupApi';
+import { useMPCStore } from '../hooks/useMPCStore';
 
 const CreateWalletScreen = () => {
+  const { lastMessage, readyState, sendMessage} = useWebSocket('');
   const navigate = useNavigate();
 
   const [admins, setAdmins] = useState([
@@ -31,38 +34,18 @@ const CreateWalletScreen = () => {
     setAdmins(admins.filter(admin => admin.id !== id));
   };
 
-  const handleCreateWallet = () => {
-    const participant_type = "AuxInfo";
-    const sid = BigInt(Date.now());
-    const my_id = BigInt(admins[0].id);
-    const other_participant_ids = new BigUint64Array(admins.slice(1).map(a => BigInt(a.id)));
-    const input = JSON.stringify({});
-
-    participant_factory(participant_type, sid, my_id, other_participant_ids, input);
-    const message: string = ready_message_factory(participant_type, sid, my_id);
-    const result: string = delegate_process_message(participant_type, message);
-    const parsedMessage: DelegateOutput = JSON.parse(result);
-
-    console.log("Received parsed message:", parsedMessage);
-
-    if (isContinue(parsedMessage)) {
-      console.log("Status: CONTINUE");
-      if (parsedMessage.Continue.length > 0) {
-        console.log("Continue Messages:", parsedMessage.Continue);
-        console.log("from: " +parsedMessage.Continue[0].from);
-        // Here you would typically send these messages to other participants via WebSocket
-      } else {
-        console.log("Continue array is empty. Waiting for more messages.");
-      }
-    } else if (isDone(parsedMessage)) {
-      console.log("Status: DONE");
-      console.log("Done Payload:", parsedMessage.Done);
-      // Protocol is finished, handle the final result
-    } else {
-      console.error("Unknown message structure received.");
+  useEffect(() => {
+    if(lastMessage?.data === "DONE") {
+      navigate('/main/tokens'); 
     }
+    const message = execute(lastMessage?.data);
+    sendMessage(message!);
+  }, [lastMessage]);
 
-    navigate('/main/tokens');
+  const handleCreateWallet = async () => {
+    //TODO: 테스트
+    const userId = useMPCStore((state) => state.userId);
+    await registerGroup(userId, admins.slice(1).map(admin => admin.id.toString()), threshold);
   };
 
   return (
