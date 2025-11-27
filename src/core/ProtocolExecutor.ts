@@ -6,7 +6,7 @@ import { participantTypeOf, getParticipantTypeName, ParticipantType } from '../t
 import { getRoundName, Round } from '../types/Round';
 
 export const execute = (json: String) => {
-    const userId = useMPCStore((state) => state.userId);
+    const userId = useMPCStore.getState().userId;
     const initResult = InitProtocolSchema.safeParse(json);
     if (initResult.success) {
         let data = initResult.data;
@@ -68,7 +68,7 @@ const handleOutput = (parsedMessage: DelegateOutput, type: string, processResult
         // 결과 저장
         saveoutput(parsedMessage, type);
     
-        const userId = useMPCStore((state) => state.userId);
+        const userId = useMPCStore.getState().userId;
         const result: ProtocolCompleteMessage = {
             sid: sid,
             memberId: userId,
@@ -107,10 +107,7 @@ const generateIntput = (data: {
     participantType?: string | undefined;
     target?: string | undefined;
 }) => {
-    const userId = useMPCStore((state) => state.userId);
-    const tshare = useMPCStore((state) => state.tshare);
-    const auxInfo = useMPCStore((state) => state.auxInfo);
-    const presign = useMPCStore((state) => state.presign);
+    const { userId, tshare, auxInfo, presign } = useMPCStore.getState();
 
     if(data.participantType === "AuxInfo") {
         return "";

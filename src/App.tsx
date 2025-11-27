@@ -6,7 +6,6 @@ import WelcomeScreen from './screens/WelcomeScreen';
 import UserAuthenticationScreen from './screens/UserAuthenticationScreen';
 import CreateWalletScreen from './screens/CreateWalletScreen';
 import RecoverWalletScreen from './screens/RecoverWalletScreen';
-import KeyGenerationScreen from './screens/KeyGenerationScreen';
 import MainTabNavigator from './navigation/MainTabNavigator'; // This will become a layout component
 import SendTokenScreen from './screens/SendTokenScreen';
 import init from './wasm/pkg/threshold_ecdsa';
@@ -32,7 +31,6 @@ function App() {
           <Route path="/auth" element={<UserAuthenticationScreen />} />
           <Route path="/create-wallet" element={<CreateWalletScreen />} />
           <Route path="/recover-wallet" element={<RecoverWalletScreen />} />
-          <Route path="/key-generation" element={<KeyGenerationScreen />} />
           <Route path="/main/*" element={<MainTabNavigator />} />
           <Route path="/send" element={<SendTokenScreen />} />
         </Routes>

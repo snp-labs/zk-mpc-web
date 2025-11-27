@@ -8,12 +8,13 @@ import { useMPCStore } from '../hooks/useMPCStore';
 
 const CreateWalletScreen = () => {
   const { lastMessage, readyState, sendMessage} = useWebSocket('');
+  const userId = useMPCStore((state) => state.userId);
   const navigate = useNavigate();
 
   const [admins, setAdmins] = useState([
     { id: 1, name: '사용자', editable: false },
-    { id: 2, name: '자체 보관소 1', editable: true },
-    { id: 3, name: '자체 보관소 2', editable: true },
+    { id: 2, name: '자체 보관소 1', editable: false },
+    { id: 3, name: '자체 보관소 2', editable: false },
   ]);
 
   const keyShares = admins.length;
@@ -44,7 +45,6 @@ const CreateWalletScreen = () => {
 
   const handleCreateWallet = async () => {
     //TODO: 테스트
-    const userId = useMPCStore((state) => state.userId);
     await registerGroup(userId, admins.slice(1).map(admin => admin.id.toString()), threshold);
   };
 
