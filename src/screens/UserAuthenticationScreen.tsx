@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './UserAuthenticationScreen.module.css';
 import { requestEmailVerification, registerMember } from '../api/userApi';
+import { useMPCStore } from '../hooks/useMPCStore';
 
 const UserAuthenticationScreen = () => {
   const navigate = useNavigate();
@@ -33,6 +34,7 @@ const UserAuthenticationScreen = () => {
     try {
       const response = await registerMember(email, authCode);
       console.log('Registration successful:', response);
+      useMPCStore.getState().setUserId(response.memberId);
       setIsAuthenticated(true);
     } catch (error) {
       console.error('Registration failed:', error);

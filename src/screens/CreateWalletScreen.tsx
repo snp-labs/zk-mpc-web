@@ -9,7 +9,7 @@ import { isProtocolCompleteMessage } from '../types/Messages';
 import { ParticipantType } from '../types/ParticipantType';
 
 const CreateWalletScreen = () => {
-  const { lastMessage, sendMessage} = useWebSocket('ws://localhost:8080/ws');
+  const { lastMessage, sendMessage} = useWebSocket('http://localhost:8080/ws');
   const userId = useMPCStore((state) => state.userId);
   const navigate = useNavigate();
 
@@ -38,7 +38,7 @@ const CreateWalletScreen = () => {
   };
 
   useEffect(() => {
-    const [destination, message] = execute(lastMessage?.data) || [];
+    const [destination, message] = execute(lastMessage) || [];
     sendMessage(destination, message!);
 
     if(isProtocolCompleteMessage(message)) {

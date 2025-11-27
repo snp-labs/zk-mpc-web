@@ -1,15 +1,15 @@
-import {InitProtocolSchema, ProceedRoundSchema, StartProtocolSchema} from './ProtocolSchema';
+import {isInitProtocolMessage, isProceedRoundMessage, isStartProtocolMessage} from './ProtocolSchema';
 import {delegate_process_message, ready_message_factory, participant_factory, generate_sign_input, generate_tpresign_input, generate_trecover_target_input, generate_tshare_input} from '../wasm/pkg/threshold_ecdsa';
 import { ContinueMessage, DelegateOutput, extractRound, isContinue, isDone, ProceedRoundMessage, ProtocolCompleteMessage, RoundCompleteMessage, InitProtocolEndMessage } from '../types/Messages';
 import {useMPCStore} from '../hooks/useMPCStore';
-import { participantTypeOf, getParticipantTypeName, ParticipantType } from '../types/ParticipantType';
+import { participantTypeOf, getParticipantTypeName, ParticipantType, getParticipantTypeFromName } from '../types/ParticipantType';
 import { getRoundName, Round } from '../types/Round';
 
 export const execute = (json: String) => {
     const userId = useMPCStore.getState().userId;
-    const initResult = InitProtocolSchema.safeParse(json);
-    if (initResult.success) {
-        let data = initResult.data;
+
+    if (isInitProtocolMessage(json)) {
+        let data = json;
         participant_factory(getParticipantTypeName(participantTypeOf(data.participantType??"")), BigInt(data.sid), BigInt(userId), new BigUint64Array(data.otherIds.map(id => BigInt(id))), generateIntput(data));
 
         const result : InitProtocolEndMessage = {
@@ -21,25 +21,24 @@ export const execute = (json: String) => {
         return ["/app/init/end", JSON.stringify(result)];
     }
 
-    const proceedResult = ProceedRoundSchema.safeParse(json);
-    if (proceedResult.success) {
-        let data = proceedResult.data;
+    if (isProceedRoundMessage(json)) {
+        let data = json;
         let result: string = delegate_process_message(data.type, data.message);
         const parsedMessage: DelegateOutput = JSON.parse(result);
-        let output = handleOutput(parsedMessage, getParticipantTypeName(participantTypeOf(data.type??"")), result, data.sid, data.message);
+        let output = handleOutput(parsedMessage, data.type, result, data.sid, data.message);
         return output;
     }
 
-    const startResult = StartProtocolSchema.safeParse(json);
-    if (startResult.success) {
-        let data = startResult.data;
-
+    if (isStartProtocolMessage(json)) {
+        let data = json;
         let readyMessage : string = ready_message_factory(getParticipantTypeName(participantTypeOf(data.type??"")), BigInt(data.sid), BigInt(userId));
         let result: string = delegate_process_message(getParticipantTypeName(participantTypeOf(data.type??"")), readyMessage);
         const parsedMessage: DelegateOutput = JSON.parse(result);
         let output = handleOutput(parsedMessage, getParticipantTypeName(participantTypeOf(data.type??"")), result, data.sid, readyMessage);
         return output;
     }
+
+    console.error("프로토콜 타입 에러")
 }
 
 const handleOutput = (parsedMessage: DelegateOutput, type: string, processResult: string, sid: string, originalMessage: string) => {

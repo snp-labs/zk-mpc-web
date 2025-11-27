@@ -19,17 +19,19 @@ export const useWebSocket = (url: string) => {
       
       // 연결 성공 시 실행될 콜백
       onConnect: () => {
-        console.log('STOMP Connection Established');
+        console.log('STOMP Connection Established: ' + userId);
         setConnected(true);
 
         // 2. 구독 설정 (Subscribe)
-        client.subscribe(`/user/${userId}/queue/messages/`, (message: IMessage) => {
+        const subscription = client.subscribe(`/queue/messages/${userId}`, (message: IMessage) => {
           if (message.body) {
             const parsedBody = JSON.parse(message.body);
             console.log('Received Message:', parsedBody);
             setLastMessage(parsedBody);
           }
         });
+
+        console.log("구독 성공! :" + subscription.id);
       },
 
       // 연결 끊김 시 실행
@@ -52,6 +54,7 @@ export const useWebSocket = (url: string) => {
     // 4. 컴포넌트 언마운트 시 연결 해제
     return () => {
       if (clientRef.current) {
+        console.log("언마운트 해제");
         clientRef.current.deactivate();
       }
     };
@@ -60,6 +63,7 @@ export const useWebSocket = (url: string) => {
   // 메시지 전송 함수 (필요 시 사용)
   const sendMessage = (destination: string, body: any) => {
     if (clientRef.current && clientRef.current.connected) {
+      console.log(destination + "으로 결과 전송")
       clientRef.current.publish({
         destination: destination,
         body: body,

@@ -58,7 +58,17 @@ export const getParticipantProcessGroup = (type: ParticipantType): ProcessGroup 
   return ParticipantTypeInfo[type].processGroup;
 };
 
-export const participantTypeOf = (targetTypeName: string): ParticipantType => {
+export const participantTypeOf = (key: string): ParticipantType => {
+  // 입력된 문자열이 Enum의 Key에 존재하는지 확인
+  if (key in ParticipantType) {
+    return ParticipantType[key as keyof typeof ParticipantType];
+  }
+  
+  // 유효하지 않은 값이면 에러 발생 (또는 필요에 따라 null/undefined 반환)
+  throw new Error(`Invalid ParticipantType: ${key}`);
+};
+
+export const getParticipantTypeFromName = (targetTypeName: string): ParticipantType => {
   // ParticipantTypeInfo의 키(Enum 값)들을 순회하며 typeName이 일치하는지 확인
   const foundType = (Object.keys(ParticipantTypeInfo) as ParticipantType[]).find(
     (key) => ParticipantTypeInfo[key].typeName === targetTypeName
@@ -69,4 +79,4 @@ export const participantTypeOf = (targetTypeName: string): ParticipantType => {
   }
 
   return foundType;
-};
+}

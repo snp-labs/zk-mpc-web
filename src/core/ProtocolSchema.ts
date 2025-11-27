@@ -1,23 +1,63 @@
-import { z } from 'zod';
+export interface InitProtocolMessage {
+  participantType?: string; // optional
+  sid: string;
+  otherIds: string[];
+  participantIds: string[];
+  threshold: number;
+  messageBytes: any;
+  target?: string; // optional
+}
 
-export const InitProtocolSchema = z.object({
-  participantType: z.string().optional(), // Enum은 string으로 처리
-  sid: z.string(),
-  otherIds: z.array(z.string()),
-  participantIds: z.array(z.string()),
-  threshold: z.number(),
-  messageBytes: z.any(),
-  target: z.string().optional(),
-});
+export const isInitProtocolMessage = (arg: any): arg is InitProtocolMessage => {
+  return (
+    arg !== null &&
 
-export const ProceedRoundSchema = z.object({
-  type: z.string(),
-  sid: z.string(),
-  message: z.string(),
-});
+    typeof arg === 'object' &&
 
+    typeof arg.participantType === 'string' &&
 
-export const StartProtocolSchema = z.object({
-  type: z.string(),
-  sid: z.string(),
-});
+    typeof arg.sid === 'string' &&
+
+    Array.isArray(arg.otherIds)  &&
+
+    Array.isArray(arg.participantIds) &&
+
+    typeof arg.threshold === 'number' &&
+
+    (arg.messageBytes === null || typeof arg.messageBytes === 'string') &&
+
+    (arg.target === null || typeof arg.target === 'string')
+  );
+};
+
+// 2. ProceedRoundMessage
+export interface ProceedRoundMessage {
+  type: string;
+  sid: string;
+  message: string;
+}
+
+export const isProceedRoundMessage = (arg: any): arg is ProceedRoundMessage => {
+  return (
+    arg !== null &&
+    typeof arg === 'object' &&
+    typeof arg.type === 'string' &&
+    typeof arg.sid === 'string' &&
+    typeof arg.message === 'string'
+  );
+};
+
+// 3. StartProtocolMessage
+export interface StartProtocolMessage {
+  type: string;
+  sid: string;
+}
+
+export const isStartProtocolMessage = (arg: any): arg is StartProtocolMessage => {
+  return (
+    arg !== null &&
+    typeof arg === 'object' &&
+    typeof arg.type === 'string' &&
+    typeof arg.sid === 'string'
+  );
+};

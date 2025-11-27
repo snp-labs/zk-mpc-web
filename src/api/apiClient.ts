@@ -19,7 +19,7 @@ const apiClient: AxiosInstance = axios.create({
 // [응답 인터셉터] 응답을 받은 후 실행 (데이터 가공 및 에러 처리)
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => {
-    return response.data;
+    return response;
   },
   (error: AxiosError) => {
     // 공통 에러 처리 로직
