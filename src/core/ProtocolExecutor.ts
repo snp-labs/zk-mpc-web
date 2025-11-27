@@ -1,25 +1,33 @@
 import {InitProtocolSchema, ProceedRoundSchema, StartProtocolSchema} from './ProtocolSchema';
 import {delegate_process_message, ready_message_factory, participant_factory, generate_sign_input, generate_tpresign_input, generate_trecover_target_input, generate_trefresh_input, generate_tshare_input} from '../wasm/pkg/threshold_ecdsa';
-import { DelegateOutput, isContinue, isDone } from '../types/messages';
+import { ContinueMessage, DelegateOutput, extractRound, isContinue, isDone, ProceedRoundMessage, ProtocolCompleteMessage, RoundCompleteMessage } from '../types/Messages';
 import {useMPCStore} from '../hooks/useMPCStore';
+import { InitProtocolEndMessage } from '../types/Messages';
+import { participantTypeOf, getParticipantTypeName, ParticipantType } from '../types/ParticipantType';
+import { getRoundName, Round } from '../types/Round';
 
 const execute = (json: String) => {
     const userId = useMPCStore((state) => state.userId);
     const initResult = InitProtocolSchema.safeParse(json);
     if (initResult.success) {
         let data = initResult.data;
-        participant_factory(data.participantType??"", BigInt(data.sid), BigInt(userId), new BigUint64Array(data.otherIds.map(id => BigInt(id))), generateIntput(data))
-        
-        return;
+        participant_factory(getParticipantTypeName(participantTypeOf(data.participantType??"")), BigInt(data.sid), BigInt(userId), new BigUint64Array(data.otherIds.map(id => BigInt(id))), generateIntput(data));
+
+        const result : InitProtocolEndMessage = {
+            type: participantTypeOf(data.participantType??""),
+            sid: data.sid,
+            memberId: userId
+        };
+
+        return JSON.stringify(result);
     }
 
-    // 2. ProceedRoundMessage로 파싱 시도
     const proceedResult = ProceedRoundSchema.safeParse(json);
     if (proceedResult.success) {
         let data = proceedResult.data;
         let result: string = delegate_process_message(data.type, data.message);
         const parsedMessage: DelegateOutput = JSON.parse(result);
-        let output = handleOutput(parsedMessage);
+        let output = handleOutput(parsedMessage, getParticipantTypeName(participantTypeOf(data.type??"")), result, data.sid, data.message);
         return output;
     }
 
@@ -27,30 +35,67 @@ const execute = (json: String) => {
     if (startResult.success) {
         let data = startResult.data;
 
-        let readyMessage : string = ready_message_factory(data.type, BigInt(data.sid), BigInt(userId));
-        let result: string = delegate_process_message(data.type, readyMessage);
+        let readyMessage : string = ready_message_factory(getParticipantTypeName(participantTypeOf(data.type??"")), BigInt(data.sid), BigInt(userId));
+        let result: string = delegate_process_message(getParticipantTypeName(participantTypeOf(data.type??"")), readyMessage);
         const parsedMessage: DelegateOutput = JSON.parse(result);
-        let output = handleOutput(parsedMessage);
+        let output = handleOutput(parsedMessage, getParticipantTypeName(participantTypeOf(data.type??"")), result, data.sid, readyMessage);
         return output;
     }
 }
 
-const handleOutput = (parsedMessage: DelegateOutput) => {
+const handleOutput = (parsedMessage: DelegateOutput, type: string, processResult: string, sid: string, originalMessage: string) => {
     if (isContinue(parsedMessage)) {
         if (parsedMessage.Continue.length > 0) {
-            // RoundEndEvent
+            const result : ProceedRoundMessage = {
+                type: type,
+                message: processResult,
+                sid: sid,
+            }
 
+            return JSON.stringify(result);
         } else {
-            // 현재 라운드 완료
-            // RoundCompleteEvent
+            const continueMessage: ContinueMessage = JSON.parse(originalMessage);
+            const round : Round = extractRound(continueMessage.message_type)
 
+            const result : RoundCompleteMessage = {
+                type: type,
+                roundName: getRoundName(round),
+                sid: sid
+            }
+
+            return JSON.stringify(result);
         }
     } else if (isDone(parsedMessage)) {
         // 결과 저장
-
-        // ProtocolCompleteEvent
+        saveoutput(parsedMessage, type);
+    
+        const userId = useMPCStore((state) => state.userId);
+        const result: ProtocolCompleteMessage = {
+            sid: sid,
+            memberId: userId,
+            type: participantTypeOf(type)
+        }
+        return JSON.stringify(result);
     } else {
         console.error("Unknown message structure received.");
+    }
+}
+
+const saveoutput = (output: DelegateOutput, type:string) => {
+    if(type === getParticipantTypeName(ParticipantType.AUXINFO_GENERATION)) {
+        if(isDone(output)){
+            useMPCStore.getState().setAuxInfo(output.Done.toString());
+        }
+    }
+    else if(type === getParticipantTypeName(ParticipantType.TSHARE)) {
+        if(isDone(output)){
+            useMPCStore.getState().setTShare(output.Done.toString());
+        }
+    }
+    else if(type === getParticipantTypeName(ParticipantType.TPRESIGN)) {
+        if(isDone(output)){
+            useMPCStore.getState().setPresign(output.Done.toString());
+        }
     }
 }
 

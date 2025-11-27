@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './CreateWalletScreen.module.css';
 import {delegate_process_message, ready_message_factory, participant_factory} from '../wasm/pkg/threshold_ecdsa';
-import { DelegateOutput, isContinue, isDone } from '../types/messages';
+import { DelegateOutput, isContinue, isDone } from '../types/Messages';
 
 const CreateWalletScreen = () => {
   const navigate = useNavigate();
