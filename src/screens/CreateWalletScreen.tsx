@@ -5,6 +5,8 @@ import { useWebSocket } from '../hooks/useWebSocket';
 import {execute} from '../core/ProtocolExecutor';
 import { registerGroup } from '../api/groupApi';
 import { useMPCStore } from '../hooks/useMPCStore';
+import { isProtocolCompleteMessage } from '../types/Messages';
+import { ParticipantType } from '../types/ParticipantType';
 
 const CreateWalletScreen = () => {
   const { lastMessage, readyState, sendMessage} = useWebSocket('');
@@ -36,11 +38,14 @@ const CreateWalletScreen = () => {
   };
 
   useEffect(() => {
-    if(lastMessage?.data === "DONE") {
-      navigate('/main/tokens'); 
-    }
     const message = execute(lastMessage?.data);
     sendMessage(message!);
+
+    if(isProtocolCompleteMessage(message)) {
+      if(message.type === ParticipantType.TSHARE) {
+        navigate('/main/tokens'); 
+      }
+    }
   }, [lastMessage]);
 
   const handleCreateWallet = async () => {

@@ -74,3 +74,13 @@ export interface RoundCompleteMessage {
   roundName: string;
   sid: string;
 }
+
+export const isProtocolCompleteMessage = (arg: any): arg is ProtocolCompleteMessage => {
+  return (
+    arg !== null &&
+    typeof arg === 'object' &&
+    typeof arg.memberId === 'string' &&
+    typeof arg.type === 'string' &&
+    typeof arg.sid === 'string'
+  );
+}
