@@ -24,9 +24,9 @@ const CreateWalletScreen = () => {
 
   useEffect(() => {
     // Initialize the worker
-    workerRef.current = new Worker(new URL('../core/protocolExecutorWorker.ts', import.meta.url));
+    workerRef.current = new Worker(new URL('../core/protocolExecutor.worker.ts', import.meta.url));
 
-    workerRef.current.onmessage = (e: MessageEvent) => {
+    workerRef.current!.onmessage = (e: MessageEvent) => {
       const { type, payload } = e.data;
       if (type === 'sendMessage') {
         const [destination, message] = payload;

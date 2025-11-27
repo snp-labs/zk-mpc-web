@@ -1,6 +1,6 @@
 /* eslint-env worker */
 
-import init, {delegate_process_message, ready_message_factory, participant_factory, generate_sign_input, generate_tpresign_input, generate_trecover_target_input, generate_tshare_input} from '../wasm/pkg/threshold_ecdsa';
+import init, {init_panic_hook, delegate_process_message, ready_message_factory, participant_factory, generate_sign_input, generate_tpresign_input, generate_trecover_target_input, generate_tshare_input} from '../wasm/pkg/threshold_ecdsa';
 import {isInitProtocolMessage, isProceedRoundMessage, isStartProtocolMessage} from './ProtocolSchema';
 import { ContinueMessage, DelegateOutput, extractRound, isContinue, isDone, ProceedRoundMessage, ProtocolCompleteMessage, RoundCompleteMessage, InitProtocolEndMessage } from '../types/Messages';
 import { participantTypeOf, getParticipantTypeName, ParticipantType, getParticipantTypeFromName } from '../types/ParticipantType';
@@ -91,15 +91,25 @@ const generateIntput = (data: any, storeState: StoreState) => {
     }
 }
 
-let initPromise: Promise<any> | null = null;
+let messageQueue: any[] = [];
+let isProcessing = false;
 
-self.onmessage = async (e: MessageEvent<{ lastMessage: string, storeState: StoreState }>) => {
-    if (!initPromise) {
-        initPromise = init();
+// Initialize WASM immediately when the worker is loaded.
+const initPromise = init().then(() => {
+    console.log("Wasm Initialized");
+    try {
+        init_panic_hook();
+        console.log("Panic Hook Installed");
+    } catch (err) {
+        console.warn("init_panic_hook failed (maybe not exported from Rust?):", err);
     }
+});
+
+const processMessage = async (data: { lastMessage: string, storeState: StoreState }) => {
+    // Wait for the initialization to complete.
     await initPromise;
 
-    const { lastMessage, storeState } = e.data;
+    const { lastMessage, storeState } = data;
     const { userId } = storeState;
     const json = lastMessage;
 
@@ -107,10 +117,10 @@ self.onmessage = async (e: MessageEvent<{ lastMessage: string, storeState: Store
 
     if (isInitProtocolMessage(json)) {
         let data = json;
-        participant_factory(getParticipantTypeName(participantTypeOf(data.participantType??"")), BigInt(data.sid), BigInt(userId), new BigUint64Array(data.otherIds.map(id => BigInt(id))), generateIntput(data, storeState));
+        participant_factory(getParticipantTypeName(participantTypeOf(data.participantType ?? "")), BigInt(data.sid), BigInt(userId), new BigUint64Array(data.otherIds.map(id => BigInt(id))), generateIntput(data, storeState));
 
-        const result : InitProtocolEndMessage = {
-            type: participantTypeOf(data.participantType??""),
+        const result: InitProtocolEndMessage = {
+            type: participantTypeOf(data.participantType ?? ""),
             sid: data.sid,
             memberId: userId
         };
@@ -129,14 +139,31 @@ self.onmessage = async (e: MessageEvent<{ lastMessage: string, storeState: Store
 
     if (isStartProtocolMessage(json)) {
         let data = json;
-        let readyMessage : string = ready_message_factory(getParticipantTypeName(participantTypeOf(data.type??"")), BigInt(data.sid), BigInt(userId));
-        console.log("type: " + getParticipantTypeName(participantTypeOf(data.type??"")));
-        console.log("ready: " + readyMessage);
-        let result: string = delegate_process_message(getParticipantTypeName(participantTypeOf(data.type??"")), readyMessage);
+        let readyMessage: string = ready_message_factory(getParticipantTypeName(participantTypeOf(data.type ?? "")), BigInt(data.sid), BigInt(userId));
+        let result: string = delegate_process_message(getParticipantTypeName(participantTypeOf(data.type ?? "")), readyMessage);
         const parsedMessage: DelegateOutput = JSON.parse(result);
-        handleOutput(parsedMessage, getParticipantTypeName(participantTypeOf(data.type??"")), result, data.sid, readyMessage, storeState);
+        handleOutput(parsedMessage, getParticipantTypeName(participantTypeOf(data.type ?? "")), result, data.sid, readyMessage, storeState);
         return;
     }
 
-    console.error("프로토콜 타입 에러")
+    console.error("Protocol type error");
+};
+
+const processQueue = async () => {
+    if (isProcessing || messageQueue.length === 0) {
+        return;
+    }
+    isProcessing = true;
+    const data = messageQueue.shift();
+    try {
+        await processMessage(data);
+    } finally {
+        isProcessing = false;
+        processQueue(); // Process next message
+    }
+};
+
+self.onmessage = (e: MessageEvent<{ lastMessage: string, storeState: StoreState }>) => {
+    messageQueue.push(e.data);
+    processQueue();
 };
