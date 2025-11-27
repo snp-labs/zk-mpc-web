@@ -3,7 +3,7 @@ import { Client, IMessage } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { useMPCStore } from './useMPCStore';
 
-export const useWebSocket = (baseUrl: string) => {
+export const useWebSocket = (url: string) => {
   const userId = useMPCStore((state) => state.userId);
   const [lastMessage, setLastMessage] = useState<any | null>(null);
   const [connected, setConnected] = useState<boolean>(false);
@@ -15,7 +15,7 @@ export const useWebSocket = (baseUrl: string) => {
     // 1. STOMP 클라이언트 생성
     const client = new Client({
       // 백엔드에서 .withSockJS()를 설정했으므로 SockJS를 팩토리로 사용
-      webSocketFactory: () => new SockJS(`${baseUrl}/ws`), 
+      webSocketFactory: () => new SockJS(url), 
       
       // 연결 성공 시 실행될 콜백
       onConnect: () => {
@@ -55,14 +55,14 @@ export const useWebSocket = (baseUrl: string) => {
         clientRef.current.deactivate();
       }
     };
-  }, [baseUrl]);
+  }, [url]);
 
   // 메시지 전송 함수 (필요 시 사용)
-  const sendMessage = (args: {destination: string, body: any}) => {
+  const sendMessage = (destination: string, body: any) => {
     if (clientRef.current && clientRef.current.connected) {
       clientRef.current.publish({
-        destination: args.destination,
-        body: args.body,
+        destination: destination,
+        body: body,
       });
     } else {
       console.warn('STOMP client is not connected.');

@@ -18,7 +18,7 @@ export const execute = (json: String) => {
             memberId: userId
         };
 
-        return JSON.stringify(result);
+        return ["/app/init/end", JSON.stringify(result)];
     }
 
     const proceedResult = ProceedRoundSchema.safeParse(json);
@@ -51,7 +51,7 @@ const handleOutput = (parsedMessage: DelegateOutput, type: string, processResult
                 sid: sid,
             }
 
-            return JSON.stringify(result);
+            return ["/app/round/end", JSON.stringify(result)];
         } else {
             const continueMessage: ContinueMessage = JSON.parse(originalMessage);
             const round : Round = extractRound(continueMessage.message_type)
@@ -62,7 +62,7 @@ const handleOutput = (parsedMessage: DelegateOutput, type: string, processResult
                 sid: sid
             }
 
-            return JSON.stringify(result);
+            return ["/app/round/complete", JSON.stringify(result)];
         }
     } else if (isDone(parsedMessage)) {
         // 결과 저장
@@ -74,7 +74,7 @@ const handleOutput = (parsedMessage: DelegateOutput, type: string, processResult
             memberId: userId,
             type: participantTypeOf(type)
         }
-        return JSON.stringify(result);
+        return ["/app/protocol/complete", JSON.stringify(result)];
     } else {
         console.error("Unknown message structure received.");
     }
