@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './CreateWalletScreen.module.css';
 import { useWebSocket } from '../hooks/useWebSocket';
-import {execute} from '../core/ProtocolExecutor';
-import { registerGroup } from '../api/groupApi';
 import { useMPCStore } from '../hooks/useMPCStore';
-import { isProtocolCompleteMessage } from '../types/Messages';
+import { isProtocolCompleteMessage, ProtocolCompleteMessage } from '../types/Messages';
 import { ParticipantType } from '../types/ParticipantType';
+import { registerGroup } from '../api/groupApi';
 
 const CreateWalletScreen = () => {
   const { lastMessage, sendMessage} = useWebSocket('http://localhost:8080/ws');
-  const userId = useMPCStore((state) => state.userId);
+  const { userId, auxInfo, tshare, presign, setAuxInfo, setTShare, setPresign } = useMPCStore();
   const navigate = useNavigate();
+  const workerRef = useRef<Worker | null>(null);
 
   const [admins, setAdmins] = useState([
     { id: 1, name: '사용자', editable: false },
@@ -21,6 +21,56 @@ const CreateWalletScreen = () => {
 
   const keyShares = admins.length;
   const threshold = keyShares > 1 ? keyShares - 1 : 1;
+
+  useEffect(() => {
+    // Initialize the worker
+    workerRef.current = new Worker(new URL('../core/protocolExecutorWorker.ts', import.meta.url));
+
+    workerRef.current.onmessage = (e: MessageEvent) => {
+      const { type, payload } = e.data;
+      if (type === 'sendMessage') {
+        const [destination, message] = payload;
+        sendMessage(destination, message);
+        
+        // Check for protocol completion to navigate
+        const parsedMessage = JSON.parse(message);
+        if (isProtocolCompleteMessage(parsedMessage)) {
+            const completeMessage = parsedMessage as ProtocolCompleteMessage;
+            if(completeMessage.type === ParticipantType.TSHARE) {
+                navigate('/main/tokens'); 
+            }
+        }
+
+      } else if (type === 'saveToStore') {
+        const { key, value } = payload;
+        if (key === 'auxInfo') {
+          setAuxInfo(value);
+        } else if (key === 'tShare') {
+          setTShare(value);
+        } else if (key === 'presign') {
+            setPresign(value);
+        }
+      }
+    };
+
+    // Cleanup
+    return () => {
+      workerRef.current?.terminate();
+    };
+  }, [navigate, sendMessage, setAuxInfo, setTShare, setPresign]);
+
+  useEffect(() => {
+    if (lastMessage && workerRef.current) {
+        const storeState = {
+            userId,
+            auxInfo,
+            tshare,
+            presign
+        };
+        workerRef.current.postMessage({ lastMessage, storeState });
+    }
+  }, [lastMessage, userId, auxInfo, tshare, presign]);
+
 
   const handleAdminNameChange = (text: string, id: number) => {
     setAdmins(
@@ -37,19 +87,8 @@ const CreateWalletScreen = () => {
     setAdmins(admins.filter(admin => admin.id !== id));
   };
 
-  useEffect(() => {
-    const [destination, message] = execute(lastMessage) || [];
-    sendMessage(destination, message!);
-
-    if(isProtocolCompleteMessage(message)) {
-      if(message.type === ParticipantType.TSHARE) {
-        navigate('/main/tokens'); 
-      }
-    }
-  }, [lastMessage]);
-
   const handleCreateWallet = async () => {
-    //TODO: 테스트
+    console.log(admins.slice(1).map(admin => admin.id.toString()));
     await registerGroup(userId, admins.slice(1).map(admin => admin.id.toString()), threshold);
   };
 

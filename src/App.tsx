@@ -15,15 +15,6 @@ import { useEffectOnce } from './hooks/useEffectOnce';
 import './App.css';
 
 function App() {
-  useEffectOnce(() => {
-    const startWasm = async() => {
-      console.log("wasm 실행");
-      await init();
-    };
-
-    startWasm();
-  });
-
   return (
       <BrowserRouter>
         <Routes>
