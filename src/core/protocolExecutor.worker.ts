@@ -20,6 +20,7 @@ const handleOutput = (parsedMessage: DelegateOutput, type: string, processResult
                 type: type,
                 message: processResult,
                 sid: sid,
+                kind: 'NONE'
             }
 
             self.postMessage({ type: 'sendMessage', payload: ["/app/round/end", JSON.stringify(result)] });
@@ -30,7 +31,8 @@ const handleOutput = (parsedMessage: DelegateOutput, type: string, processResult
             const result : RoundCompleteMessage = {
                 type: type,
                 roundName: getRoundName(round),
-                sid: sid
+                sid: sid,
+                kind: 'NONE'
             }
 
             self.postMessage({ type: 'sendMessage', payload: ["/app/round/complete", JSON.stringify(result)] });
@@ -42,7 +44,8 @@ const handleOutput = (parsedMessage: DelegateOutput, type: string, processResult
         const result: ProtocolCompleteMessage = {
             sid: sid,
             memberId: storeState.userId,
-            type: getParticipantTypeFromName(type)
+            type: getParticipantTypeFromName(type),
+            kind: 'COMPLETE'
         }
         self.postMessage({ type: 'sendMessage', payload: ["/app/protocol/complete", JSON.stringify(result)] });
     } else {
@@ -53,17 +56,17 @@ const handleOutput = (parsedMessage: DelegateOutput, type: string, processResult
 const saveoutput = (output: DelegateOutput, type:string) => {
     if(type === getParticipantTypeName(ParticipantType.AUXINFO_GENERATION)) {
         if(isDone(output)){
-            self.postMessage({ type: 'saveToStore', payload: { key: 'auxInfo', value: output.Done.toString() } });
+            self.postMessage({ type: 'saveToStore', payload: { key: 'auxInfo', value: JSON.stringify(output.Done) } });
         }
     }
     else if(type === getParticipantTypeName(ParticipantType.TSHARE)) {
         if(isDone(output)){
-            self.postMessage({ type: 'saveToStore', payload: { key: 'tShare', value: output.Done.toString() } });
+            self.postMessage({ type: 'saveToStore', payload: { key: 'tShare', value: JSON.stringify(output.Done) } });
         }
     }
     else if(type === getParticipantTypeName(ParticipantType.TPRESIGN)) {
         if(isDone(output)){
-            self.postMessage({ type: 'saveToStore', payload: { key: 'presign', value: output.Done.toString() } });
+            self.postMessage({ type: 'saveToStore', payload: { key: 'presign', value: JSON.stringify(output.Done) } });
         }
     }
 }
@@ -109,8 +112,6 @@ const processMessage = async (data: { lastMessage: string, storeState: StoreStat
     // Wait for the initialization to complete.
     await initPromise;
 
-    console.log("메시지 수신");
-
     const { lastMessage, storeState } = data;
     const { userId } = storeState;
     const json = lastMessage;
@@ -124,7 +125,8 @@ const processMessage = async (data: { lastMessage: string, storeState: StoreStat
         const result: InitProtocolEndMessage = {
             type: participantTypeOf(data.participantType ?? ""),
             sid: data.sid,
-            memberId: userId
+            memberId: userId,
+            kind: 'NONE'
         };
 
         self.postMessage({ type: 'sendMessage', payload: ["/app/init/end", JSON.stringify(result)] });
@@ -133,7 +135,9 @@ const processMessage = async (data: { lastMessage: string, storeState: StoreStat
 
     if (isProceedRoundMessage(json)) {
         let data = json;
+        console.log("delegate start : " + data.message.slice(0, 100));
         let result: string = delegate_process_message(data.type, data.message);
+        console.log("delegate result : " + result.slice(0, 100));
         const parsedMessage: DelegateOutput = JSON.parse(result);
         handleOutput(parsedMessage, data.type, result, data.sid, data.message, storeState);
         return;

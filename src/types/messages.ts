@@ -54,33 +54,30 @@ export interface ProceedRoundMessage {
   type: string;
   message: string;
   sid: string;
+  kind: 'NONE';
 }
 
 export interface InitProtocolEndMessage {
   type: ParticipantType;
   sid: string;
   memberId: string;
+  kind: 'NONE';
 }
 
-// 3. ProtocolCompleteMessage
 export interface ProtocolCompleteMessage {
   sid: string;
   memberId: string;
   type: ParticipantType;
+  kind: 'COMPLETE';
 }
 
 export interface RoundCompleteMessage {
   type: string;
   roundName: string;
   sid: string;
+  kind: 'NONE';
 }
 
 export const isProtocolCompleteMessage = (arg: any): arg is ProtocolCompleteMessage => {
-  return (
-    arg !== null &&
-    typeof arg === 'object' &&
-    typeof arg.memberId === 'string' &&
-    typeof arg.type === 'string' &&
-    typeof arg.sid === 'string'
-  );
+  return arg?.kind === 'COMPLETE';
 }

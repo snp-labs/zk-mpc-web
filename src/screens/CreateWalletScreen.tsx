@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { data, useNavigate } from 'react-router-dom';
 import styles from './CreateWalletScreen.module.css';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useMPCStore } from '../hooks/useMPCStore';
@@ -23,23 +23,16 @@ const CreateWalletScreen = () => {
   const threshold = keyShares > 1 ? keyShares - 1 : 1;
 
   useEffect(() => {
-    // 1. 워커 생성
     const worker = new Worker(new URL('../core/protocolExecutor.worker.ts', import.meta.url));
     workerRef.current = worker;
     console.log("Worker Created (Initial Only)");
 
-    // 2. 컴포넌트가 완전히 사라질 때(Unmount)만 종료
     return () => {
       console.log("Worker Terminated");
       worker.terminate();
     };
   }, []); 
 
-  // =========================================================
-  // [수정 2] onmessage 핸들러 갱신
-  // navigate, sendMessage 등 최신 상태가 필요할 때마다 핸들러만 교체
-  // 워커는 죽이지 않음!
-  // =========================================================
   useEffect(() => {
     if (!workerRef.current) return;
 
@@ -48,7 +41,6 @@ const CreateWalletScreen = () => {
       
       if (type === 'sendMessage') {
         const [destination, message] = payload;
-        sendMessage(destination, message); 
         
         const parsedMessage = JSON.parse(message);
         if (isProtocolCompleteMessage(parsedMessage)) {
@@ -58,6 +50,8 @@ const CreateWalletScreen = () => {
             }
         }
 
+        const { kind, ...dataToSend } = parsedMessage;
+        sendMessage(destination, JSON.stringify(dataToSend)); 
       } else if (type === 'saveToStore') {
         const { key, value } = payload;
         if (key === 'auxInfo') setAuxInfo(value);
@@ -67,21 +61,16 @@ const CreateWalletScreen = () => {
     };
   }, [navigate, sendMessage, setAuxInfo, setTShare, setPresign]); // 의존성 배열 유지
 
-  // =========================================================
-  // [수정 3] 메시지 전달 로직 (기존과 동일하되 workerRef 체크 강화)
-  // =========================================================
+  const storeStateRef = useRef({ userId, auxInfo, tshare, presign });
+  useEffect(() => {
+    storeStateRef.current = { userId, auxInfo, tshare, presign };
+  }, [userId, auxInfo, tshare, presign]);
+
   useEffect(() => {
     if (lastMessage && workerRef.current) {
-        // 메시지가 오면 워커로 전달
-        const storeState = {
-            userId,
-            auxInfo,
-            tshare,
-            presign
-        };
-        workerRef.current.postMessage({ lastMessage, storeState });
+        workerRef.current.postMessage({ lastMessage, storeState: storeStateRef.current });
     }
-  }, [lastMessage, userId, auxInfo, tshare, presign]);
+  }, [lastMessage]); 
 
 
   const handleAdminNameChange = (text: string, id: number) => {
