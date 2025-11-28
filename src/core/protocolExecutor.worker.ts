@@ -42,7 +42,7 @@ const handleOutput = (parsedMessage: DelegateOutput, type: string, processResult
         const result: ProtocolCompleteMessage = {
             sid: sid,
             memberId: storeState.userId,
-            type: participantTypeOf(type)
+            type: getParticipantTypeFromName(type)
         }
         self.postMessage({ type: 'sendMessage', payload: ["/app/protocol/complete", JSON.stringify(result)] });
     } else {
@@ -108,6 +108,8 @@ const initPromise = init().then(() => {
 const processMessage = async (data: { lastMessage: string, storeState: StoreState }) => {
     // Wait for the initialization to complete.
     await initPromise;
+
+    console.log("메시지 수신");
 
     const { lastMessage, storeState } = data;
     const { userId } = storeState;

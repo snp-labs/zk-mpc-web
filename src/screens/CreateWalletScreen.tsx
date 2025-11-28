@@ -23,16 +23,33 @@ const CreateWalletScreen = () => {
   const threshold = keyShares > 1 ? keyShares - 1 : 1;
 
   useEffect(() => {
-    // Initialize the worker
-    workerRef.current = new Worker(new URL('../core/protocolExecutor.worker.ts', import.meta.url));
+    // 1. 워커 생성
+    const worker = new Worker(new URL('../core/protocolExecutor.worker.ts', import.meta.url));
+    workerRef.current = worker;
+    console.log("Worker Created (Initial Only)");
 
-    workerRef.current!.onmessage = (e: MessageEvent) => {
+    // 2. 컴포넌트가 완전히 사라질 때(Unmount)만 종료
+    return () => {
+      console.log("Worker Terminated");
+      worker.terminate();
+    };
+  }, []); 
+
+  // =========================================================
+  // [수정 2] onmessage 핸들러 갱신
+  // navigate, sendMessage 등 최신 상태가 필요할 때마다 핸들러만 교체
+  // 워커는 죽이지 않음!
+  // =========================================================
+  useEffect(() => {
+    if (!workerRef.current) return;
+
+    workerRef.current.onmessage = (e: MessageEvent) => {
       const { type, payload } = e.data;
+      
       if (type === 'sendMessage') {
         const [destination, message] = payload;
-        sendMessage(destination, message);
+        sendMessage(destination, message); 
         
-        // Check for protocol completion to navigate
         const parsedMessage = JSON.parse(message);
         if (isProtocolCompleteMessage(parsedMessage)) {
             const completeMessage = parsedMessage as ProtocolCompleteMessage;
@@ -43,24 +60,19 @@ const CreateWalletScreen = () => {
 
       } else if (type === 'saveToStore') {
         const { key, value } = payload;
-        if (key === 'auxInfo') {
-          setAuxInfo(value);
-        } else if (key === 'tShare') {
-          setTShare(value);
-        } else if (key === 'presign') {
-            setPresign(value);
-        }
+        if (key === 'auxInfo') setAuxInfo(value);
+        else if (key === 'tShare') setTShare(value);
+        else if (key === 'presign') setPresign(value);
       }
     };
+  }, [navigate, sendMessage, setAuxInfo, setTShare, setPresign]); // 의존성 배열 유지
 
-    // Cleanup
-    return () => {
-      workerRef.current?.terminate();
-    };
-  }, [navigate, sendMessage, setAuxInfo, setTShare, setPresign]);
-
+  // =========================================================
+  // [수정 3] 메시지 전달 로직 (기존과 동일하되 workerRef 체크 강화)
+  // =========================================================
   useEffect(() => {
     if (lastMessage && workerRef.current) {
+        // 메시지가 오면 워커로 전달
         const storeState = {
             userId,
             auxInfo,

@@ -8,21 +8,27 @@ export const useWebSocket = (url: string) => {
   const [lastMessage, setLastMessage] = useState<any | null>(null);
   const [connected, setConnected] = useState<boolean>(false);
   
-  // stompClient를 ref로 관리하여 리렌더링 시에도 유지
   const clientRef = useRef<Client | null>(null);
 
   useEffect(() => {
+    // [중요] userId가 없으면 연결하지 않음 (불필요한 에러/재연결 방지)
+    if (!userId) {
+        console.log("UserID가 없어 연결을 대기합니다.");
+        return;
+    }
+
     // 1. STOMP 클라이언트 생성
     const client = new Client({
-      // 백엔드에서 .withSockJS()를 설정했으므로 SockJS를 팩토리로 사용
-      webSocketFactory: () => new SockJS(url), 
-      
-      // 연결 성공 시 실행될 콜백
+      webSocketFactory: () => new SockJS(url),
+      // 자동 재연결 시간 설정 (선택사항, 5초)
+      reconnectDelay: 5000, 
+      heartbeatIncoming: 0, 
+      heartbeatOutgoing: 0,
       onConnect: () => {
-        console.log('STOMP Connection Established: ' + userId);
+        console.log(`STOMP 연결 성공 (User: ${userId})`);
         setConnected(true);
 
-        // 2. 구독 설정 (Subscribe)
+        // 2. 구독 설정 (User ID가 포함된 정확한 경로)
         const subscription = client.subscribe(`/queue/messages/${userId}`, (message: IMessage) => {
           if (message.body) {
             const parsedBody = JSON.parse(message.body);
@@ -30,20 +36,22 @@ export const useWebSocket = (url: string) => {
             setLastMessage(parsedBody);
           }
         });
-
-        console.log("구독 성공! :" + subscription.id);
+        console.log(`구독 완료 ID: ${subscription.id}`);
       },
 
-      // 연결 끊김 시 실행
+      onWebSocketClose: (event: CloseEvent) => {
+          console.log(`[웹소켓 종료] 코드: ${event.code}, 이유: ${event.reason}`);
+          setConnected(false);
+      },
+
       onDisconnect: () => {
-        console.log('STOMP Connection Closed');
+        console.log('STOMP 연결 끊김');
         setConnected(false);
       },
 
-      // 에러 발생 시
       onStompError: (frame) => {
-        console.error('Broker reported error: ' + frame.headers['message']);
-        console.error('Additional details: ' + frame.body);
+        console.error('STOMP 에러:', frame.headers['message']);
+        console.error('상세 내용:', frame.body);
       },
     });
 
@@ -51,25 +59,26 @@ export const useWebSocket = (url: string) => {
     client.activate();
     clientRef.current = client;
 
-    // 4. 컴포넌트 언마운트 시 연결 해제
+    // 4. Cleanup 함수
     return () => {
+      console.log("WebSocket Cleanup (언마운트 또는 ID 변경)");
+      // 비동기적인 해제 처리를 위해 deactivate 사용
       if (clientRef.current) {
-        console.log("언마운트 해제");
-        clientRef.current.deactivate();
+         clientRef.current.deactivate();
       }
     };
-  }, [url]);
+  }, [url, userId]); // [중요] userId가 바뀌면 재연결해야 하므로 의존성 추가
 
-  // 메시지 전송 함수 (필요 시 사용)
+  // 메시지 전송 함수
   const sendMessage = (destination: string, body: any) => {
     if (clientRef.current && clientRef.current.connected) {
-      console.log(destination + "으로 결과 전송")
+      console.log(`${destination}으로 메시지 전송`);
       clientRef.current.publish({
         destination: destination,
         body: body,
       });
     } else {
-      console.warn('STOMP client is not connected.');
+      console.warn('소켓이 연결되지 않아 메시지를 보낼 수 없습니다.');
     }
   };
 
