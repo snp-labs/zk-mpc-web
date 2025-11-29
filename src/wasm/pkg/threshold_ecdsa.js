@@ -477,6 +477,47 @@ function __wbg_get_imports() {
         const ret = arg0.length;
         return ret;
     };
+    imports.wbg.__wbg_log_0cc1b7768397bcfe = function(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7) {
+        let deferred0_0;
+        let deferred0_1;
+        try {
+            deferred0_0 = arg0;
+            deferred0_1 = arg1;
+            console.log(getStringFromWasm0(arg0, arg1), getStringFromWasm0(arg2, arg3), getStringFromWasm0(arg4, arg5), getStringFromWasm0(arg6, arg7));
+        } finally {
+            wasm.__wbindgen_free(deferred0_0, deferred0_1, 1);
+        }
+    };
+    imports.wbg.__wbg_log_cb9e190acc5753fb = function(arg0, arg1) {
+        let deferred0_0;
+        let deferred0_1;
+        try {
+            deferred0_0 = arg0;
+            deferred0_1 = arg1;
+            console.log(getStringFromWasm0(arg0, arg1));
+        } finally {
+            wasm.__wbindgen_free(deferred0_0, deferred0_1, 1);
+        }
+    };
+    imports.wbg.__wbg_mark_7438147ce31e9d4b = function(arg0, arg1) {
+        performance.mark(getStringFromWasm0(arg0, arg1));
+    };
+    imports.wbg.__wbg_measure_fb7825c11612c823 = function() { return handleError(function (arg0, arg1, arg2, arg3) {
+        let deferred0_0;
+        let deferred0_1;
+        let deferred1_0;
+        let deferred1_1;
+        try {
+            deferred0_0 = arg0;
+            deferred0_1 = arg1;
+            deferred1_0 = arg2;
+            deferred1_1 = arg3;
+            performance.measure(getStringFromWasm0(arg0, arg1), getStringFromWasm0(arg2, arg3));
+        } finally {
+            wasm.__wbindgen_free(deferred0_0, deferred0_1, 1);
+            wasm.__wbindgen_free(deferred1_0, deferred1_1, 1);
+        }
+    }, arguments) };
     imports.wbg.__wbg_msCrypto_a61aeb35a24c1329 = function(arg0) {
         const ret = arg0.msCrypto;
         return ret;

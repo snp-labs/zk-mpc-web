@@ -9,7 +9,7 @@ import { registerGroup } from '../api/groupApi';
 
 const CreateWalletScreen = () => {
   const { lastMessage, sendMessage} = useWebSocket('http://localhost:8080/ws');
-  const { userId, auxInfo, tshare, presign, setAuxInfo, setTShare, setPresign } = useMPCStore();
+  const { userId, auxInfo, tshare, presign, setAuxInfo, setTShare, setPresign, setAddress, setPk } = useMPCStore();
   const navigate = useNavigate();
   const workerRef = useRef<Worker | null>(null);
 
@@ -56,10 +56,12 @@ const CreateWalletScreen = () => {
         const { key, value } = payload;
         if (key === 'auxInfo') setAuxInfo(value);
         else if (key === 'tShare') setTShare(value);
+        else if (key === 'address') setAddress(value);
+        else if (key === 'pk') setPk(value);
         else if (key === 'presign') setPresign(value);
       }
     };
-  }, [navigate, sendMessage, setAuxInfo, setTShare, setPresign]); // 의존성 배열 유지
+  }, [navigate, sendMessage, setAuxInfo, setTShare, setPresign, setAddress, setPk]); // 의존성 배열 유지
 
   const storeStateRef = useRef({ userId, auxInfo, tshare, presign });
   useEffect(() => {

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './TokensScreen.module.css';
 
@@ -6,15 +6,30 @@ import styles from './TokensScreen.module.css';
 import ethereumIcon from '../assets/images/ethereum_icon.png';
 import walletImage from '../assets/images/wallet.png';
 import allowImage from '../assets/images/allow.png';
+import { useMPCStore } from '../hooks/useMPCStore';
+import { ethers } from 'ethers';
 
 const tokens = [
   { name: 'Ethereum', symbol: 'ETH', balance: '1.25', icon: ethereumIcon },
 ];
 
 const TokensScreen = () => {
+  const { address } = useMPCStore();
   const navigate = useNavigate();
-  const walletAddress = '0x1234...5678'; // Placeholder for wallet address
+  const RPC_URL = "http://61.74.32.229:8545"; // 여기에 RPC URL을 입력하세요.
+  const chainId = 1337;
+  const [balance, setBalance] = useState("0");
+  const provider = new ethers.JsonRpcProvider(RPC_URL);
   const primaryColor = '#0055FF'; // Hardcoded from theme
+
+  useEffect(() => {
+    const setting = async() => {
+      let balance = await provider.getBalance(address);
+      setBalance(ethers.formatEther(balance).toString());
+    }
+
+    setting();
+  }, [])
 
   return (
     <div className={styles.container}>
@@ -25,7 +40,7 @@ const TokensScreen = () => {
           alt="Wallet"
           className={styles.walletImage}
         />
-        <p className={styles.walletAddress}>{walletAddress}</p>
+        <p className={styles.walletAddress}>{address}</p>
       </div>
       <button
         className={styles.addTokenButton}
@@ -42,7 +57,7 @@ const TokensScreen = () => {
           <div className={styles.cardBottomRow}>
             <p className={styles.balanceText}>
               {"잔액     "}
-              <span className={styles.balanceAmount}>{token.balance}</span>
+              <span className={styles.balanceAmount}>{balance}</span>
               {` ${token.symbol}`}
             </p>
             <div

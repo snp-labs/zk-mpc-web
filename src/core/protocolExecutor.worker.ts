@@ -1,10 +1,11 @@
 /* eslint-env worker */
 
-import init, {init_panic_hook, delegate_process_message, ready_message_factory, participant_factory, generate_sign_input, generate_tpresign_input, generate_trecover_target_input, generate_tshare_input} from '../wasm/pkg/threshold_ecdsa';
+import init, {init_panic_hook, delegate_process_message, ready_message_factory, participant_factory, generate_sign_input, generate_tpresign_input, generate_trecover_target_input, generate_tshare_input, get_master_pk} from '../wasm/pkg/threshold_ecdsa';
 import {isInitProtocolMessage, isProceedRoundMessage, isStartProtocolMessage} from './ProtocolSchema';
 import { ContinueMessage, DelegateOutput, extractRound, isContinue, isDone, ProceedRoundMessage, ProtocolCompleteMessage, RoundCompleteMessage, InitProtocolEndMessage } from '../types/Messages';
 import { participantTypeOf, getParticipantTypeName, ParticipantType, getParticipantTypeFromName } from '../types/ParticipantType';
 import { getRoundName, Round } from '../types/Round';
+import { ethers } from 'ethers';
 
 interface StoreState {
     userId: string;
@@ -61,6 +62,12 @@ const saveoutput = (output: DelegateOutput, type:string) => {
     }
     else if(type === getParticipantTypeName(ParticipantType.TSHARE)) {
         if(isDone(output)){
+            let rawPk = get_master_pk(JSON.stringify(output.Done));
+            let cleanPk = rawPk.replace(/['"]+/g, '').trim();
+            let finalPk = cleanPk.slice(-130);
+            let address = ethers.computeAddress("0x" + finalPk)
+            self.postMessage({ type: 'saveToStore', payload: { key: 'address', value: address } });
+            self.postMessage({ type: 'saveToStore', payload: { key: 'pk', value: finalPk } });
             self.postMessage({ type: 'saveToStore', payload: { key: 'tShare', value: JSON.stringify(output.Done) } });
         }
     }
@@ -146,7 +153,9 @@ const processMessage = async (data: { lastMessage: string, storeState: StoreStat
     if (isStartProtocolMessage(json)) {
         let data = json;
         let readyMessage: string = ready_message_factory(getParticipantTypeName(participantTypeOf(data.type ?? "")), BigInt(data.sid), BigInt(userId));
+        console.log("ready message 결과 : " + readyMessage.slice(0, 100));
         let result: string = delegate_process_message(getParticipantTypeName(participantTypeOf(data.type ?? "")), readyMessage);
+        console.log("delegate result : " + result.slice(0, 100)); 
         const parsedMessage: DelegateOutput = JSON.parse(result);
         handleOutput(parsedMessage, getParticipantTypeName(participantTypeOf(data.type ?? "")), result, data.sid, readyMessage, storeState);
         return;
@@ -170,6 +179,10 @@ const processQueue = async () => {
 };
 
 self.onmessage = (e: MessageEvent<{ lastMessage: string, storeState: StoreState }>) => {
-    messageQueue.push(e.data);
-    processQueue();
+    // messageQueue.push(e.data);
+    // processQueue();
+    const lastMessage = e.data.lastMessage;
+    const storeState = e.data.storeState;
+
+    processMessage({lastMessage, storeState});
 };
