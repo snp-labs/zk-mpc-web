@@ -63,9 +63,10 @@ const saveoutput = (output: DelegateOutput, type:string) => {
     else if(type === getParticipantTypeName(ParticipantType.TSHARE)) {
         if(isDone(output)){
             let rawPk = get_master_pk(JSON.stringify(output.Done));
-            let cleanPk = rawPk.replace(/['"]+/g, '').trim();
-            let finalPk = cleanPk.slice(-130);
-            let address = ethers.computeAddress("0x" + finalPk)
+
+            let rawHex = JSON.parse(rawPk);
+            let finalPk = "0x" + rawHex.slice(-130);
+            let address = ethers.computeAddress(finalPk)
             self.postMessage({ type: 'saveToStore', payload: { key: 'address', value: address } });
             self.postMessage({ type: 'saveToStore', payload: { key: 'pk', value: finalPk } });
             self.postMessage({ type: 'saveToStore', payload: { key: 'tShare', value: JSON.stringify(output.Done) } });
