@@ -77,6 +77,18 @@ const saveoutput = (output: DelegateOutput, type:string) => {
             self.postMessage({ type: 'saveToStore', payload: { key: 'presign', value: JSON.stringify(output.Done) } });
         }
     }
+    else if(type === getParticipantTypeName(ParticipantType.TRECOVERTARGET)) {
+        if(isDone(output)){
+            let rawPk = get_master_pk(JSON.stringify(output.Done));
+
+            let rawHex = JSON.parse(rawPk);
+            let finalPk = "0x" + rawHex.slice(-130);
+            let address = ethers.computeAddress(finalPk)
+            self.postMessage({ type: 'saveToStore', payload: { key: 'address', value: address } });
+            self.postMessage({ type: 'saveToStore', payload: { key: 'pk', value: finalPk } });
+            self.postMessage({ type: 'saveToStore', payload: { key: 'tShare', value: JSON.stringify(output.Done) } });
+        }
+    }
 }
 
 const generateIntput = (data: any, storeState: StoreState) => {
@@ -128,6 +140,7 @@ const processMessage = async (data: { lastMessage: string, storeState: StoreStat
 
     if (isInitProtocolMessage(json)) {
         let data = json;
+
         participant_factory(getParticipantTypeName(participantTypeOf(data.participantType ?? "")), BigInt(data.sid), BigInt(userId), new BigUint64Array(data.otherIds.map(id => BigInt(id))), generateIntput(data, storeState));
 
         const result: InitProtocolEndMessage = {

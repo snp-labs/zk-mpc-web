@@ -6,10 +6,11 @@ import { useMPCStore } from '../hooks/useMPCStore';
 import { isProtocolCompleteMessage, ProtocolCompleteMessage } from '../types/Messages';
 import { ParticipantType } from '../types/ParticipantType';
 import { registerGroup } from '../api/groupApi';
+import { registerAddress } from '../api/userApi';
 
 const CreateWalletScreen = () => {
   const { lastMessage, sendMessage} = useWebSocket('http://localhost:8080/ws');
-  const { userId, auxInfo, tshare, presign, setAuxInfo, setTShare, setPresign, setAddress, setPk } = useMPCStore();
+  const { userId, auxInfo, tshare, presign, address, setAuxInfo, setTShare, setPresign, setAddress, setPk } = useMPCStore();
   const navigate = useNavigate();
   const workerRef = useRef<Worker | null>(null);
 
@@ -33,6 +34,11 @@ const CreateWalletScreen = () => {
     };
   }, []); 
 
+  const goToMainPage = async () => {
+    await registerAddress(userId, address);
+    navigate('/main/tokens'); 
+  }
+
   useEffect(() => {
     if (!workerRef.current) return;
 
@@ -46,7 +52,7 @@ const CreateWalletScreen = () => {
         if (isProtocolCompleteMessage(parsedMessage)) {
             const completeMessage = parsedMessage as ProtocolCompleteMessage;
             if(completeMessage.type === ParticipantType.TSHARE) {
-                navigate('/main/tokens'); 
+                goToMainPage();
             }
         }
 
@@ -61,7 +67,7 @@ const CreateWalletScreen = () => {
         else if (key === 'presign') setPresign(value);
       }
     };
-  }, [navigate, sendMessage, setAuxInfo, setTShare, setPresign, setAddress, setPk]); // 의존성 배열 유지
+  }, [navigate, sendMessage, setAuxInfo, setTShare, setPresign, setAddress, setPk, goToMainPage]); // 의존성 배열 유지
 
   const storeStateRef = useRef({ userId, auxInfo, tshare, presign });
   useEffect(() => {
