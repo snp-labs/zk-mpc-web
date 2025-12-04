@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import styles from './UserAuthenticationScreen.module.css';
 import { requestEmailVerification, registerMember } from '../api/userApi';
 import { useMPCStore } from '../hooks/useMPCStore';
@@ -12,7 +12,7 @@ const UserAuthenticationScreen = () => {
   const [isVerificationRequested, setIsVerificationRequested] = useState(false);
 
   const handleRequestVerification = async () => {
-    if (!email) {
+    if (!email.trim()) {
       alert('이메일을 입력해주세요.');
       return;
     }
@@ -26,44 +26,59 @@ const UserAuthenticationScreen = () => {
     }
   };
 
-  const handleRegister = async () => {
-    if (!authCode) {
+
+  const handleAuthenticate = async () => {
+    if (!authCode.trim()) {
       alert('인증번호를 입력해주세요.');
       return;
     }
     try {
       const response = await registerMember(email, authCode);
       console.log('Registration successful:', response);
+      
       useMPCStore.getState().setUserId(response.memberId);
       setIsAuthenticated(true);
+      alert('사용자 인증이 완료되었습니다.');
     } catch (error) {
-      console.error('Registration failed:', error);
+      console.error('Authentication failed:', error);
       alert('인증에 실패했습니다.');
     }
   };
 
+  const isSendButtonDisabled = !email.trim() || isVerificationRequested;
+  const isAuthButtonDisabled = !authCode.trim() || isAuthenticated;
+
   return (
     <div className={styles.outerContainer}>
       <div className={styles.container}>
-        <h2 className={styles.header}>
+        <h2 className={styles.headerTitle}>
           사용자 인증
         </h2>
-        <p className={styles.subHeader}>
+        <p className={styles.instructionText}>
           지갑 생성에 필요한 정보를 입력해주세요.
         </p>
 
+        <div className={styles.formSection}>
+        <h3 className={styles.sectionTitle}>사용자 정보 입력</h3>
+        
+
         <div className={styles.inputRow}>
           <div className={styles.inputContainer}>
-            <label className={styles.inputLabel} htmlFor="email-input">이메일주소를 입력하세요.</label>
+            <label className={styles.inputLabel} htmlFor="email-input">이메일 입력</label>
             <input
               id="email-input"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className={styles.input}
+              disabled={isVerificationRequested}
             />
           </div>
-          <button className={styles.button} onClick={handleRequestVerification}>
+          <button 
+            className={styles.authButton}
+            onClick={handleRequestVerification}
+            disabled={isSendButtonDisabled}
+          >
             전송
           </button>
         </div>
@@ -78,17 +93,23 @@ const UserAuthenticationScreen = () => {
                 value={authCode}
                 onChange={(e) => setAuthCode(e.target.value)}
                 className={styles.input}
+                disabled={isAuthenticated}
               />
             </div>
-            <button className={styles.button} onClick={handleRegister}>
+            <button 
+              className={styles.authButton}
+              onClick={handleAuthenticate}
+              disabled={isAuthButtonDisabled}
+            >
               인증
             </button>
           </div>
         )}
 
         {isAuthenticated && (
-          <p className={styles.authMessage}>인증 되었습니다.</p>
+          <p className={styles.authMessage}>인증되었습니다</p>
         )}
+      </div>
       </div>
 
       <div className={styles.buttonContainer}>
