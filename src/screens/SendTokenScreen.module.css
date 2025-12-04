@@ -1,15 +1,25 @@
-.outerContainer {
+.container { 
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  width: 100%;
   background-color: #fff;
-  margin-top: 40px;
+  padding: 0;
   position: relative;
 }
 
-.container {
+.contentArea {
   flex-grow: 1;
-  padding: 16px;
+  padding: 0 20px; 
+  padding-top: 20px;
+    padding-bottom: 80px; 
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  padding: 0px 0px 20px 0px;
+
 }
 
 .backButton {
@@ -17,11 +27,12 @@
   border: none;
   cursor: pointer;
   padding: 0;
-  margin-bottom: 16px;
+  margin-right: 10px;
 }
 
+
 .walletInfoContainer {
-  margin-top: 30px;
+  /* margin-top: 30px; <- contentArea의 padding-top 20px이 있으므로 조정 */
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -36,49 +47,6 @@
 
 .walletAddress {
   font-size: 16px;
-}
-
-.card {
-  margin-bottom: 16px;
-  background-color: #F8FAFB;
-  border: 1px solid #E7E8E9;
-  border-radius: 4px;
-  padding: 16px;
-}
-
-.cardTopRow {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
-.tokenIcon {
-  width: 32px;
-  height: 32px;
-  margin-right: 23px;
-}
-
-.tokenName {
-  font-size: 22px;
-  font-family: "Pretendard-Semibold";
-}
-
-.cardBottomRow {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.balanceText {
-  color: #A9A9A9;
-  font-size: 16px;
-}
-
-.balanceAmount {
-  font-weight: bold;
-  color: #34393C;
 }
 
 .title {
@@ -100,11 +68,19 @@
   font-size: 16px;
 }
 
+.input:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
 .buttonContainer {
-  position: absolute;
-  bottom: 32px;
-  left: 24px;
-  right: 24px;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 15px 20px;
+  background-color: white;
+  z-index: 10;
 }
 
 .nextButton {

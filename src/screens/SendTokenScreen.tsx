@@ -8,6 +8,7 @@ import { requestTransaction } from '../api/TransactionApi';
 import { useMPCStore } from '../hooks/useMPCStore';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { ethers, Transaction } from 'ethers';
+import TokenCard from '../components/TokenCard';
 
 // Define a type for the token for clarity
 interface Token {
@@ -201,11 +202,14 @@ const SendTokenScreen = () => {
   }
 
   return (
-    <div className={styles.outerContainer}>
-      <div className={styles.container}>
-        <button onClick={() => navigate(-1)} className={styles.backButton}>
-          <LeftArrowIcon color="#222B3D" size={16} />
-        </button>
+    <div className={styles.container}>
+      <div className={styles.contentArea}>
+        <div className={styles.header}>
+          <button onClick={() => navigate(-1)} className={styles.backButton}>
+            <LeftArrowIcon color="#222B3D" size={16} />
+          </button>
+        </div>
+        
         <div className={styles.walletInfoContainer}>
           <img
             src={walletImage}
@@ -214,19 +218,16 @@ const SendTokenScreen = () => {
           />
           <p className={styles.walletAddress}>{address}</p>
         </div>
-        <div className={styles.card}>
-          <div className={styles.cardTopRow}>
-            <img src={token.icon} alt={`${token.name} icon`} className={styles.tokenIcon} />
-            <p className={styles.tokenName}>{token.name}</p>
-          </div>
-          <div className={styles.cardBottomRow}>
-            <p className={styles.balanceText}>
-              {"출금가능     "}
-              <span className={styles.balanceAmount}>{balance}</span>
-              {` ${token.symbol}`}
-            </p>
-          </div>
-        </div>
+        
+        <>
+          <TokenCard
+            key={token.symbol}
+            token={token}
+            balance={balance}
+            navigate={navigate}
+            allowImage={false}
+          />
+        </>
 
         <h3 className={styles.title}>얼마를 보내시겠어요?</h3>
         <input
@@ -243,8 +244,9 @@ const SendTokenScreen = () => {
           onChange={(e) => setRecipient(e.target.value)}
           className={styles.input}
         />
-        <div style={{ height: 100 }} />
+        <div style={{ height: '80px' }} /> 
       </div>
+      
       <div className={styles.buttonContainer}>
         <button
           className={styles.nextButton}
