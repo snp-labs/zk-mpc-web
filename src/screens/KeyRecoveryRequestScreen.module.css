@@ -1,0 +1,153 @@
+.outerContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  min-height: 100vh;
+  position: relative;
+  background-color: #ffffff;
+  padding-bottom: 100px; 
+
+}
+
+.container {
+  flex-grow: 1;
+  padding: 20px;
+  padding-bottom: 100px; 
+  width: 100%; 
+}
+
+
+.headerTitle {
+  font-size: 28px;
+  font-weight: 200;
+  color: #000000;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.instructionText {
+  font-size: 16px;
+  font-weight: 200;
+  color: #333;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.sectionTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 24px;
+  /* border-bottom: 1px solid #eee; */
+  padding-bottom: 10px;
+}
+
+.inputRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  max-width: 500px; 
+  margin-left: auto; 
+  margin-right: auto;
+}
+
+.inputContainer {
+  flex: 1;
+  margin-right: 8px;
+  position: relative;
+}
+
+.input {
+  width: 100%;
+  height: 40px;
+  padding: 8px 12px;
+  border: 1px solid #E7E8E9;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-size: 14px;
+  background-color: #F8FAFB;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #007bff;
+  /* box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);  */
+}
+
+.inputLabel {
+  position: absolute;
+  top: -18px;
+  left: 0px;
+  background-color: transparent;
+  padding: 0 4px;
+  font-size: 12px;
+  color: #707476;
+}
+
+.authButton {
+  height: 40px; /* input과 높이 일치 */
+  padding: 0 16px;
+  background-color: #ffffff; /* 배경은 흰색 */
+  color: #007bff; /* 글자색은 파란색 */
+  border: 1px solid #007bff; /* 파란색 테두리 */
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap; /* 텍스트 줄바꿈 방지 */
+  transition: background-color 0.3s ease;
+  margin-left: 8px; /* 입력 필드와 간격 */
+}
+
+
+.primaryButton {
+  position: fixed;
+  bottom: 0; /* 화면의 맨 아래에 배치 */
+  left: 0;
+  right: 0;
+  width: 100%;
+  padding: 15px 20px;
+  box-sizing: border-box;
+  background-color: #ffffff;
+  z-index: 1000;
+  
+}
+
+.primaryButtonInner {
+  width: 100%;
+  /* max-width: 500px; */
+  padding: 15px;
+  background-color: #0055FF;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin: 0 auto;
+}
+
+.primaryButtonInner:hover:not(:disabled) {
+  background-color: rgb(0, 88, 220);
+}
+
+
+.authButton:hover:not(:disabled){
+  background-color: #d7eaff; 
+}
+
+.authButton:disabled {
+  color: #a0a0a0;
+  border-color: #d7d7d7;
+  background-color: #f7f7f7;
+  cursor: not-allowed;
+}
+
+.primaryButtonInner:disabled {
+  background-color: #d7d7d7;
+  cursor: not-allowed;
+}
