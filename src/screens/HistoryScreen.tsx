@@ -8,24 +8,35 @@ const mockTransactions = [
 ];
 
 const HistoryScreen = () => {
-  const renderItem = (item: typeof mockTransactions[0]) => (
-    <div key={item.id} className={styles.listItem}>
-      <div className={styles.icon}>
-        {item.type === 'sent' ? '↑' : '↓'}
+  const renderItem = (item: typeof mockTransactions[0]) => {
+    const isSent = item.type === 'sent';
+    const transactionType = isSent ? '보냄' : '받음';
+    const addressInfo = isSent ? `수신: ${item.to}` : `발신: ${item.from}`;
+    
+    // 아이콘: Sent는 위로(↑), Received는 아래로(↓)
+    const iconSymbol = isSent ? '↑' : '↓'; 
+
+    return (
+      <div key={item.id} className={styles.listItem}>
+        <div className={styles.icon}>
+          {iconSymbol}
+        </div>
+        <div className={styles.content}>
+          <p className={styles.title}>{`${transactionType} ${item.amount}`}</p>
+          <p className={styles.description}>{addressInfo}</p>
+        </div>
+        <p className={styles.date}>{item.date}</p>
       </div>
-      <div className={styles.content}>
-        <p className={styles.title}>{`${item.type === 'sent' ? 'Sent' : 'Received'} ${item.amount}`}</p>
-        <p className={styles.description}>{item.type === 'sent' ? `To: ${item.to}` : `From: ${item.from}`}</p>
-      </div>
-      <p className={styles.date}>{item.date}</p>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className={styles.container}>
-      <h2 className={styles.header}>Transaction History</h2>
-      <div>
-        {mockTransactions.map(renderItem)}
+      <div className={styles.contentArea}>
+        <h2 className={styles.header}>거래 내역</h2>
+        <div className={styles.listWrapper}>
+          {mockTransactions.map(renderItem)}
+        </div>
       </div>
     </div>
   );

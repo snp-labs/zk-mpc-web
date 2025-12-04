@@ -5,6 +5,10 @@ import CustomTabBar from './CustomTabBar';
 import TokensScreen from '../screens/TokensScreen';
 import HistoryScreen from '../screens/HistoryScreen';
 import MoreScreen from '../screens/MoreScreen';
+import KeyRecoveryRequestScreen from '../screens/KeyRecoveryRequestScreen';
+import UserAuthenticationScreen from '../screens/UserAuthenticationScreen';
+import RecoverySuccessScreen from '../screens/RecoverySuccessScreen';
+import RecoveryFailureScreen from '../screens/RecoveryFailureScreen';
 
 const MainLayout = () => {
   return (

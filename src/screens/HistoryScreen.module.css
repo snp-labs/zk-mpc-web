@@ -1,16 +1,23 @@
 .container {
+  display: flex;
+  flex-direction: column;
   flex-grow: 1;
-  padding: 16px;
-  margin-top: 40px;
+  width: 100%;
+  min-height: 100vh;
+  background-color: #ffffff; 
+  padding: 0;
+}
+
+.contentArea {
+  padding: 20px
 }
 
 .header {
-  margin-bottom: 24px;
-  text-align: center;
-  font-size: 22px; /* Approximating Title */
-  font-family: "Pretendard-Semibold";
+  font-size: 18px;
+  font-weight: 700;
+  padding: 0px 0px 20px 0px;
+  margin: 0;
 }
-
 .listItem {
   display: flex;
   align-items: center;
