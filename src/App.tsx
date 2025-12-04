@@ -10,9 +10,10 @@ import MainTabNavigator from './navigation/MainTabNavigator'; // This will becom
 import SendTokenScreen from './screens/SendTokenScreen';
 import init from './wasm/pkg/threshold_ecdsa';
 import { useEffectOnce } from './hooks/useEffectOnce';
-
-// I will also need a global CSS file for fonts and base styles.
 import './App.css';
+import KeyRecoveryRequestScreen from './screens/KeyRecoveryRequestScreen';
+import RecoverySuccessScreen from './screens/RecoverySuccessScreen';
+import RecoveryFailureScreen from './screens/RecoveryFailureScreen';
 
 function App() {
   return (
@@ -24,6 +25,10 @@ function App() {
           <Route path="/recover-wallet" element={<RecoverWalletScreen />} />
           <Route path="/main/*" element={<MainTabNavigator />} />
           <Route path="/send" element={<SendTokenScreen />} />
+          <Route path="more/key-recovery-request" element={<KeyRecoveryRequestScreen />} />
+          <Route path="more/user-authentication" element={<UserAuthenticationScreen />} />
+          <Route path="more/recovery-success" element={<RecoverySuccessScreen />} />
+          <Route path="more/recovery-failure" element={<RecoveryFailureScreen />} />
         </Routes>
       </BrowserRouter>
   );
