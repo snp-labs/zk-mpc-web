@@ -8,7 +8,7 @@ export interface ApiResponse<T> {
 
 // 1. Axios 인스턴스 생성
 const apiClient: AxiosInstance = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:8080/api/v1', 
+  baseURL: 'http://localhost:8080/api/v1', 
   timeout: 10000, // 10초 타임아웃
   headers: {
     'Content-Type': 'application/json',
